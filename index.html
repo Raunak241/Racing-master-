@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Racing Master by Raunak.K</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #e0e0e0; font-family: sans-serif; }
+    canvas { display: block; margin: 0 auto; background: url('village_background.jpg') no-repeat center center; background-size: cover; }
+    #menu { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; }
+    button { padding: 10px 20px; font-size: 18px; margin: 5px; border-radius: 10px; border: none; background: #555; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <h1>Presented by Raunak.K (@mrchakia)</h1>
+    <p>Select Your Car:</p>
+    <button onclick="selectCar('silver')">Silver Car</button>
+    <button onclick="selectCar('red')">Red Car</button>
+    <p id="score">Score: 0</p>
+  </div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+  <audio id="bgMusic" autoplay loop>
+    <source src="background_music.mp3" type="audio/mp3">
+  </audio>
+  <audio id="coinSound" src="coin.mp3"></audio>
+  <audio id="crashSound" src="crash.mp3"></audio>
+
+  <script>
+    let canvas = document.getElementById('gameCanvas');
+    let ctx = canvas.getContext('2d');
+    let carType = 'silver';
+    let score = 0;
+    let gameRunning = true;
+
+    function selectCar(type) {
+      carType = type;
+      document.getElementById('menu').style.display = 'none';
+      startGame();
+    }
+
+    let car = { x: 180, y: 500, w: 40, h: 70 };
+    let coins = [];
+    let speed = 3;
+
+    function spawnCoin() {
+      coins.push({ x: Math.random() * 360, y: -20 });
+    }
+
+    function drawCar() {
+      ctx.fillStyle = carType === 'silver' ? 'silver' : 'red';
+      ctx.fillRect(car.x, car.y, car.w, car.h);
+    }
+
+    function drawCoins() {
+      ctx.fillStyle = 'gold';
+      coins.forEach(c => ctx.fillRect(c.x, c.y, 20, 20));
+    }
+
+    function updateCoins() {
+      coins.forEach(c => c.y += speed);
+      coins = coins.filter(c => {
+        if (c.y > 600) return false;
+        if (c.x < car.x + car.w && c.x + 20 > car.x && c.y < car.y + car.h && c.y + 20 > car.y) {
+          score++;
+          document.getElementById('score').textContent = 'Score: ' + score;
+          document.getElementById('coinSound').play();
+          return false;
+        }
+        return true;
+      });
+    }
+
+    function moveCar(e) {
+      if (!gameRunning) return;
+      if (e.key === 'ArrowLeft' && car.x > 0) car.x -= 20;
+      if (e.key === 'ArrowRight' && car.x < 360) car.x += 20;
+    }
+
+    function startGame() {
+      setInterval(spawnCoin, 1000);
+      requestAnimationFrame(update);
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCar();
+      drawCoins();
+      updateCoins();
+      if (gameRunning) requestAnimationFrame(update);
+    }
+
+    document.addEventListener('keydown', moveCar);
+
+    const bgMusic = document.getElementById("bgMusic");
+    document.addEventListener("click", () => {
+      if (bgMusic.paused) {
+        bgMusic.play().catch(e => console.log("Autoplay issue:", e));
+      }
+    });
+  </script>
+
+  <p style="text-align:center;margin-top:10px;">Thanks for playing! Subscribe: @mrchakia</p>
+</body>
+</html>
